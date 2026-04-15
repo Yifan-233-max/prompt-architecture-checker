@@ -1,13 +1,15 @@
 # Prompt Architecture Reviewer Skill
 
-Review prompt-as-code repositories for contract, flow, and architecture-pattern weaknesses before runtime.
+This first commit is a metadata scaffold for a prompt architecture reviewer skill repository.
+
+It defines the intended contract for reviewing prompt-as-code repositories for contract, flow, and architecture-pattern weaknesses before runtime.
 
 ## What This Repository Ships
 
-- `SKILL.md`: the public skill entrypoint
-- `reviewer-prompt.md`: the detailed review procedure
-- `output-format.md`: the canonical findings model and report shape
-- `examples/`: positive, negative, and mixed review fixtures
+- `SKILL.md`: planned public skill entrypoint
+- `reviewer-prompt.md`: planned detailed review procedure
+- `output-format.md`: planned canonical findings model and report shape
+- `examples/`: planned positive, negative, and mixed review fixtures
 
 ## What The Skill Reviews
 
@@ -33,6 +35,8 @@ Review this prompt-as-code repository. Focus on contract, flow, and architecture
 ```
 
 ## Repository Layout
+
+The intended repository layout is:
 
 - `SKILL.md`
 - `reviewer-prompt.md`
