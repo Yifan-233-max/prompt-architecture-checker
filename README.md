@@ -45,6 +45,14 @@ The intended repository layout is:
 - `examples/bad-repo/`
 - `examples/mixed-repo/`
 
+## Suggested Reading Order
+
+1. `README.md` for repository purpose and quick usage
+2. `SKILL.md` for the public skill contract
+3. `reviewer-prompt.md` for the detailed review heuristic
+4. `output-format.md` for the report shape
+5. `examples/` for fixture repositories and expected outputs
+
 ## Review Output Contract
 
 Every finding should include:
