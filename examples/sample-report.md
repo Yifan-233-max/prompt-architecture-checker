@@ -18,8 +18,8 @@ The repository centers on `ui-test-orchestrator`, which coordinates CPC acquisit
    - **Issue:** The contract makes success-path handoffs explicit, but it does not model a distinct failure-path release flow.
    - **Evidence:** The contract includes success-oriented handoffs and a completion item `Session resources released`, but no separate failure-path edge or cleanup step.
    - **Why it matters:** Reviewers can infer cleanup intent, but cannot verify failure-path symmetry from the graph alone.
-   - **Suggested fix:** Add an explicit cleanup or failure-path handoff in future workflow examples when modeling release-sensitive flows.
+   - **Suggested fix:** Add an explicit cleanup or failure-path handoff to the workflow model so release-sensitive flows remain reviewable.
 
 ## Suggested Next Fix
 
-- Add an explicit failure-path cleanup or release edge to the example workflow model.
+- Add an explicit failure-path cleanup or release edge to the workflow model.
