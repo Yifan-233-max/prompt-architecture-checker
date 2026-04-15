@@ -5,6 +5,8 @@ description: Review a prompt-as-code repository for contract, flow, and architec
 
 # Prompt Architecture Reviewer
 
+Use this skill when a user wants a repository-level review of a prompt-as-code project, agent workflow repository, or multi-file prompt orchestration system.
+
 ## Outcome
 
 Return a severity-ranked findings list with evidence and concrete modification suggestions.
@@ -18,8 +20,6 @@ Return a severity-ranked findings list with evidence and concrete modification s
 - Focus on contract, flow, and architecture-pattern issues before style.
 
 ## Workflow
-
-This scaffold intentionally references supporting documents that are added in later tasks.
 
 1. Inspect the repository tree and main documentation.
 2. Identify the core artifacts and likely subsystem boundaries.
