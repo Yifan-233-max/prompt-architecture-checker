@@ -33,7 +33,7 @@ Look for:
 - releases or reporting steps that are not reachable from all important paths
 - workflow stages that appear ordered only by implication
 
-Only make flow claims that are visible from declared or strongly inferable repository structure.
+Only make flow claims that are visible from declared or strongly inferable parse structure.
 
 ## Pattern Lens
 
@@ -49,15 +49,15 @@ Look for:
 
 ### Confirmed Findings
 
-Use when repository evidence directly supports the claim.
+Use when parse evidence directly supports the claim.
 
 ### High-Risk Signals
 
-Use when the structure strongly suggests a weakness, but the repository does not declare enough contract detail to prove it completely.
+Use when the structure strongly suggests a weakness, but the parse output does not declare enough contract detail to prove it completely.
 
 ### Reviewability Gaps
 
-Use when the repository is too implicit to assess reliably and that lack of explicit structure is itself a maintainability problem.
+Use when the parse output is too implicit to assess reliably and that lack of explicit structure is itself a maintainability problem.
 
 Missing or uncertain parse evidence that prevents reliable review should also be reported here rather than filled in with a fresh repo-wide inventory.
 
