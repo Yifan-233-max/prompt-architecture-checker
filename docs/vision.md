@@ -47,7 +47,7 @@ AI-assisted repository interpretation for structure summary, call flow, handoff 
 Focused analysis of parse output for handoff and completion problems, graph problems, and implicit state dependencies.
 
 ### Report
-Human-readable markdown that combines structure summary, key relationship graph, prioritized findings, and suggested fixes.
+Human-readable markdown that serves as the prioritized final deliverable by combining parse structure, key relationship graph, highest-priority findings, and suggested fixes.
 
 ## Future Modes
 

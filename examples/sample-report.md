@@ -11,6 +11,8 @@ The repository centers on `ui-test-orchestrator`, which coordinates CPC acquisit
 
 ## Highest-Priority Findings
 
+This report is the prioritized final deliverable, so it includes the highest-priority warning from the review pass rather than repeating the informational confirmation from the review findings example.
+
 ### Warning
 
 1. **flow** `examples/sample-orchestrator.contract.json`

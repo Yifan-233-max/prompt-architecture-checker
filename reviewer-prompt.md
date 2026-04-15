@@ -2,16 +2,17 @@
 
 ## Purpose
 
-Review a prompt-as-code repository for contract, flow, and architecture-pattern weaknesses before runtime.
+Review parse output for contract, flow, and architecture-pattern weaknesses before runtime.
 
 ## Review Sequence
 
-1. Read the repository tree and primary documentation.
-2. Build an inventory of orchestrators, agents, skills, workflows, memory references, artifacts, and routing hints.
-3. Separate explicit declarations from inferred structure.
-4. Review the repository through the contract, flow, and pattern lenses below.
-5. Merge overlapping findings and rank them by severity.
-6. Produce concrete repair suggestions tied to evidence.
+1. Read the parse structure summary, relationship graph, evidence, and uncertainties.
+2. Use that parse output as the review input rather than rebuilding the full repository inventory from scratch.
+3. Separate explicit parse-backed evidence from inferred structure and risk.
+4. Review the parse output through the contract, flow, and pattern lenses below.
+5. If parse evidence is missing for a claim you need to make, record that as a reviewability gap instead of silently reconstructing the whole repository.
+6. Merge overlapping findings and rank them by severity.
+7. Produce concrete repair suggestions tied to parse evidence and stated uncertainties.
 
 ## Contract Lens
 
@@ -58,6 +59,8 @@ Use when the structure strongly suggests a weakness, but the repository does not
 
 Use when the repository is too implicit to assess reliably and that lack of explicit structure is itself a maintainability problem.
 
+Missing or uncertain parse evidence that prevents reliable review should also be reported here rather than filled in with a fresh repo-wide inventory.
+
 ## Suggestion Rules
 
 - Prefer the smallest explicit boundary improvement that would remove the ambiguity.
@@ -69,6 +72,8 @@ Use when the repository is too implicit to assess reliably and that lack of expl
 ## Final Report Rules
 
 - Sort findings by severity first.
+- Present the highest-priority findings rather than dumping every review note verbatim.
 - Keep evidence concrete and repo-specific.
 - Explain why each issue matters for orchestration stability or maintainability.
 - Do not pad the report with style comments.
+- Stay within contract, flow, and pattern scope rather than broad codebase critique.

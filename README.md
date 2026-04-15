@@ -43,7 +43,7 @@ The first version focuses on AI-assisted structure understanding and focused arc
 ## Repository Layout
 
 - `docs/vision.md`: product vision and architecture
-- `docs/lint-rules.md`: initial high-value lint rules
+- `docs/lint-rules.md`: candidate future deterministic lint rules
 - `schemas/prompt-contract.schema.json`: minimal machine-readable contract schema
 - `examples/`: example prompt-as-code structures, contract snippets, and sample parse / review / report outputs
 
@@ -51,7 +51,7 @@ The first version focuses on AI-assisted structure understanding and focused arc
 
 - replacing natural-language prompts with a rigid DSL
 - enforcing writing style or tone as a primary quality gate
-- executing external tools during lint unless explicitly enabled
+- executing external tools as part of future deterministic lint unless explicitly enabled
 
 ## Suggested Product Path
 
