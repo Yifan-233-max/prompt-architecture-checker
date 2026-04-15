@@ -2,7 +2,7 @@
 
 A design-first repository for a prompt-as-code architecture checker.
 
-This project is intended to review complex prompt-driven, multi-agent systems in the same way linters, static analyzers, and architecture review tools validate codebases.
+This project reviews complex prompt-driven, multi-agent systems in the same way linters, static analyzers, and architecture review tools validate codebases. It also includes a prompt architecture reviewer skill and fixture repositories for repository-level review of prompt-as-code systems.
 
 ## Problem
 
@@ -34,6 +34,13 @@ The first version focuses on AI-assisted structure understanding and focused arc
 - markdown report output
 - evidence and uncertainty annotations
 
+## Included Reviewer Skill Assets
+
+- `SKILL.md`: public skill entrypoint
+- `reviewer-prompt.md`: detailed review procedure
+- `output-format.md`: canonical findings model and report shape
+- `examples/good-repo/`, `examples/bad-repo/`, `examples/mixed-repo/`: repository review fixtures and expected outputs
+
 ## Proposed Components
 
 - `parse`: interprets a prompt-as-code repository and produces a structure summary plus relationship graph
@@ -45,7 +52,32 @@ The first version focuses on AI-assisted structure understanding and focused arc
 - `docs/vision.md`: product vision and architecture
 - `docs/lint-rules.md`: candidate future deterministic lint rules
 - `schemas/prompt-contract.schema.json`: minimal machine-readable contract schema
-- `examples/`: example prompt-as-code structures, contract snippets, and sample parse / review / report outputs
+- `SKILL.md`: public entrypoint for repository-level prompt architecture review
+- `reviewer-prompt.md`: detailed review procedure for parse-informed architecture review
+- `output-format.md`: canonical findings schema and report templates
+- `examples/`: example prompt-as-code structures, contract snippets, sample parse / review / report outputs, and reviewer fixtures
+
+## Suggested Reading Order
+
+1. `README.md` for repository purpose and quick usage
+2. `docs/vision.md` for product direction and architecture framing
+3. `SKILL.md` for the public skill contract
+4. `reviewer-prompt.md` for the detailed review heuristic
+5. `output-format.md` for the report shape
+6. `examples/` for fixture repositories and expected outputs
+
+## Review Output Contract
+
+Every finding should include:
+
+- severity
+- findingClass
+- category
+- artifactScope
+- message
+- evidence
+- whyItMatters
+- suggestedFix
 
 ## Non-Goals
 

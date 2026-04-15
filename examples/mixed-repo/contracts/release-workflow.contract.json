@@ -1,0 +1,33 @@
+{
+  "name": "release-workflow",
+  "kind": "workflow",
+  "description": "Coordinates release review and publishing.",
+  "inputs": [
+    {
+      "name": "releaseBranch",
+      "required": true,
+      "description": "Branch that should be evaluated for release."
+    }
+  ],
+  "outputs": [],
+  "reads": [
+    "memories/release-state.md"
+  ],
+  "writes": [
+    "memories/release-state.md"
+  ],
+  "artifacts": [
+    "reports/release-summary.md"
+  ],
+  "allowedTools": [
+    "read_file",
+    "runSubagent"
+  ],
+  "completion": [],
+  "handoffs": [
+    {
+      "target": "publish-agent",
+      "condition": "after review"
+    }
+  ]
+}

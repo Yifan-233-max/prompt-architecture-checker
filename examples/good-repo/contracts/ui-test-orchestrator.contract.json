@@ -1,0 +1,51 @@
+{
+  "name": "ui-test-orchestrator",
+  "kind": "orchestrator",
+  "description": "Coordinates CPC acquisition, UI execution, reporting, and release.",
+  "inputs": [
+    {
+      "name": "testCasePath",
+      "required": true,
+      "description": "Path to the requested test case file."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "reportPath",
+      "required": true,
+      "description": "Generated report artifact path."
+    }
+  ],
+  "reads": [
+    "config/resource-pool.json",
+    "/memories/session/test-state-session-N.md"
+  ],
+  "writes": [
+    "/memories/session/test-state-session-N.md",
+    "reports/test-run.html"
+  ],
+  "artifacts": [
+    "evidence/session-N/"
+  ],
+  "allowedTools": [
+    "runSubagent",
+    "read_file",
+    "memory"
+  ],
+  "completion": [
+    "Report file exists",
+    "Session resources released"
+  ],
+  "handoffs": [
+    {
+      "target": "cpc-connector",
+      "condition": "after ACQUIRE",
+      "expectedOutput": "Connected CPC and updated state file"
+    },
+    {
+      "target": "report-generator",
+      "condition": "after EXECUTE",
+      "expectedOutput": "Self-contained HTML report"
+    }
+  ]
+}
