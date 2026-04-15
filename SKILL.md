@@ -19,6 +19,8 @@ Return a severity-ranked findings list with evidence and concrete modification s
 
 ## Workflow
 
+This scaffold intentionally references supporting documents that are added in later tasks.
+
 1. Inspect the repository tree and main documentation.
 2. Identify the core artifacts and likely subsystem boundaries.
 3. Follow `reviewer-prompt.md` for the detailed review procedure.
