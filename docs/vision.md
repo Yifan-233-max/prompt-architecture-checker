@@ -38,22 +38,30 @@ A flow edge represents one explicit handoff or dependency between two prompt art
 ### Finding
 A finding is a typed result with severity, rationale, location, and recommended fix.
 
-## Checker Modes
+## First Product Slice
 
-### Lint
-Deterministic checks for missing files, broken references, route conflicts, undeclared writes, missing cleanup, and contract inconsistencies.
+### Parse
+AI-assisted repository interpretation for structure summary, call flow, handoff graph, evidence, and uncertainty markers.
 
 ### Review
-LLM-assisted review for ambiguity, conflicting goals, hidden assumptions, context budget risk, and weak observability.
+Focused analysis of parse output for handoff and completion problems, graph problems, and implicit state dependencies.
+
+### Report
+Human-readable markdown that combines structure summary, key relationship graph, prioritized findings, and suggested fixes.
+
+## Future Modes
+
+### Lint
+Deterministic checks for missing files, broken references, route conflicts, undeclared writes, missing cleanup, and contract inconsistencies after the parse artifact stabilizes.
 
 ### Simulate
-Flow analysis to validate resource acquisition and release symmetry, step reachability, and evidence generation expectations.
+Flow analysis to validate resource acquisition and release symmetry, step reachability, and evidence generation expectations after graph and review maturity.
 
 ## Output Targets
 
-- human-readable markdown report
-- JSON for downstream tooling
-- SARIF for CI and PR annotation
+- human-readable markdown report as the primary first-version surface
+- thin structured parse / review artifact used internally between commands
+- JSON or SARIF as later outputs once the first slice stabilizes
 
 ## Likely First Users
 

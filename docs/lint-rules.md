@@ -1,5 +1,9 @@
 # Initial Lint Rules
 
+This document lists candidate future deterministic lint rules for Prompt Architecture Checker.
+
+The first implementation slice is centered on `parse`, `review`, and `report`, so the rules below are roadmap material rather than the first delivered capability.
+
 ## Contract Rules
 
 1. Every orchestrator handoff must declare expected output.
