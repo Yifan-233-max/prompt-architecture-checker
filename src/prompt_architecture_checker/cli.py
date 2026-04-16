@@ -45,4 +45,5 @@ def main(
             write_output(Path(args.out_path), body)
         return 0
 
-    return 0
+    print(f"Command '{args.command}' is not yet implemented.", file=stdout)
+    return 1
