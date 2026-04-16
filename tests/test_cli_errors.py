@@ -1,7 +1,5 @@
 import json
 
-import pytest
-
 from prompt_architecture_checker.cli import main
 from prompt_architecture_checker.runner import RunnerInvocationError
 from prompt_architecture_checker import skill_assets
