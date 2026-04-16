@@ -20,19 +20,11 @@ def run_parse(repo_path: Path, runner: SkillRunner) -> ParseArtifact:
     return parse_parse_artifact(payload)
 
 
-def run_review_stage(
-    repo_path: Path,
-    runner: SkillRunner,
-    parse_artifact: ParseArtifact,
-) -> ReviewArtifact:
+def run_review(repo_path: Path, runner: SkillRunner) -> tuple[ParseArtifact, ReviewArtifact]:
+    parse_artifact = run_parse(repo_path, runner)
     skill_text = load_skill_text("review")
     prompt = build_review_prompt(repo_path, skill_text, parse_artifact)
     raw_response = runner.run(prompt)
     payload = json.loads(raw_response)
-    return parse_review_artifact(payload)
-
-
-def run_review(repo_path: Path, runner: SkillRunner) -> tuple[ParseArtifact, ReviewArtifact]:
-    parse_artifact = run_parse(repo_path, runner)
-    review_artifact = run_review_stage(repo_path, runner, parse_artifact)
+    review_artifact = parse_review_artifact(payload)
     return parse_artifact, review_artifact

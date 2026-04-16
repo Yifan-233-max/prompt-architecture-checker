@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from .orchestrator import run_parse, run_review_stage
+from .orchestrator import run_parse, run_review
 from .output import render_parse, render_review, write_output
 from .runner import CopilotCliRunner, SkillRunner
 
@@ -47,13 +47,12 @@ def main(
 
     if args.command == "review":
         print("Parsing...", file=stdout)
-        parse_artifact = run_parse(repo_path, runner)
+        parse_artifact, review_artifact = run_review(repo_path, runner)
         print(
             f"Parse complete: {len(parse_artifact.summary)} summary items, {len(parse_artifact.graph)} graph edges",
             file=stdout,
         )
         print("Reviewing...", file=stdout)
-        review_artifact = run_review_stage(repo_path, runner, parse_artifact)
         body = render_review(review_artifact)
         print(
             f"Review complete: {len(review_artifact.findings)} findings",
