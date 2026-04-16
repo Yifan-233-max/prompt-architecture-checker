@@ -1,5 +1,11 @@
 import argparse
+import sys
+from pathlib import Path
 from typing import Sequence
+
+from .orchestrator import run_parse
+from .output import render_parse, write_output
+from .runner import CopilotCliRunner, SkillRunner
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -14,7 +20,29 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(
+    argv: Sequence[str] | None = None,
+    runner: SkillRunner | None = None,
+    stdout=None,
+) -> int:
     parser = build_parser()
-    parser.parse_args(argv)
+    args = parser.parse_args(argv)
+
+    runner = runner or CopilotCliRunner()
+    stdout = stdout or sys.stdout
+    repo_path = Path(args.repo)
+
+    if args.command == "parse":
+        print("Parsing...", file=stdout)
+        artifact = run_parse(repo_path, runner)
+        body = render_parse(artifact)
+        print(
+            f"Parse complete: {len(artifact.summary)} summary items, {len(artifact.graph)} graph edges",
+            file=stdout,
+        )
+        print(body, file=stdout)
+        if args.out_path:
+            write_output(Path(args.out_path), body)
+        return 0
+
     return 0
