@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .contracts import ParseArtifact, ReviewArtifact
+from .contracts import ParseArtifact, ReportArtifact, ReviewArtifact
 
 
 def render_parse(artifact: ParseArtifact) -> str:
@@ -42,6 +42,10 @@ def render_review(artifact: ReviewArtifact) -> str:
         lines.append("")
 
     return "\n".join(lines).rstrip()
+
+
+def render_report(artifact: ReportArtifact) -> str:
+    return artifact.markdown
 
 
 def write_output(path: Path, body: str) -> None:

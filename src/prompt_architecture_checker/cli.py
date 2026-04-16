@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from .orchestrator import run_parse, run_review
-from .output import render_parse, render_review, write_output
+from .orchestrator import run_parse, run_report, run_review
+from .output import render_parse, render_report, render_review, write_output
 from .runner import CopilotCliRunner, SkillRunner
 
 
@@ -63,5 +63,21 @@ def main(
             write_output(Path(args.out_path), body)
         return 0
 
-    print(f"Command '{args.command}' is not yet implemented.", file=stdout)
-    return 1
+    print("Parsing...", file=stdout)
+    parse_artifact, review_artifact, report_artifact = run_report(repo_path, runner)
+    print(
+        f"Parse complete: {len(parse_artifact.summary)} summary items, {len(parse_artifact.graph)} graph edges",
+        file=stdout,
+    )
+    print("Reviewing...", file=stdout)
+    print(
+        f"Review complete: {len(review_artifact.findings)} findings",
+        file=stdout,
+    )
+    print("Reporting...", file=stdout)
+    body = render_report(report_artifact)
+    print("Report complete: markdown ready", file=stdout)
+    print(body, file=stdout)
+    if args.out_path:
+        write_output(Path(args.out_path), body)
+    return 0

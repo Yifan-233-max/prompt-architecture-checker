@@ -3,11 +3,12 @@ from pathlib import Path
 
 from .contracts import (
     ParseArtifact,
+    ReportArtifact,
     ReviewArtifact,
     parse_parse_artifact,
     parse_review_artifact,
 )
-from .prompt_builder import build_parse_prompt, build_review_prompt
+from .prompt_builder import build_parse_prompt, build_report_prompt, build_review_prompt
 from .runner import SkillRunner
 from .skill_assets import load_skill_text
 
@@ -28,3 +29,19 @@ def run_review(repo_path: Path, runner: SkillRunner) -> tuple[ParseArtifact, Rev
     payload = json.loads(raw_response)
     review_artifact = parse_review_artifact(payload)
     return parse_artifact, review_artifact
+
+
+def run_report(
+    repo_path: Path,
+    runner: SkillRunner,
+) -> tuple[ParseArtifact, ReviewArtifact, ReportArtifact]:
+    parse_artifact, review_artifact = run_review(repo_path, runner)
+    skill_text = load_skill_text("report")
+    prompt = build_report_prompt(
+        repo_path,
+        skill_text,
+        parse_artifact,
+        review_artifact,
+    )
+    raw_response = runner.run(prompt)
+    return parse_artifact, review_artifact, ReportArtifact(markdown=raw_response)
