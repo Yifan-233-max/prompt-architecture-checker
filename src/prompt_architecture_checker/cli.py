@@ -85,26 +85,29 @@ def main(
                 write_output(Path(args.out_path), body)
             return 0
 
-        print("Parsing...", file=stdout)
-        parse_artifact = run_parse(repo_path, runner)
-        print(
-            f"Parse complete: {len(parse_artifact.summary)} summary items, {len(parse_artifact.graph)} graph edges",
-            file=stdout,
-        )
-        print("Reviewing...", file=stdout)
-        review_artifact = run_review_stage(repo_path, runner, parse_artifact)
-        print(
-            f"Review complete: {len(review_artifact.findings)} findings",
-            file=stdout,
-        )
-        print("Reporting...", file=stdout)
-        report_artifact = run_report_stage(repo_path, runner, parse_artifact, review_artifact)
-        body = render_report(report_artifact)
-        print("Report complete: markdown ready", file=stdout)
-        print(body, file=stdout)
-        if args.out_path:
-            write_output(Path(args.out_path), body)
-        return 0
+        if args.command == "report":
+            print("Parsing...", file=stdout)
+            parse_artifact = run_parse(repo_path, runner)
+            print(
+                f"Parse complete: {len(parse_artifact.summary)} summary items, {len(parse_artifact.graph)} graph edges",
+                file=stdout,
+            )
+            print("Reviewing...", file=stdout)
+            review_artifact = run_review_stage(repo_path, runner, parse_artifact)
+            print(
+                f"Review complete: {len(review_artifact.findings)} findings",
+                file=stdout,
+            )
+            print("Reporting...", file=stdout)
+            report_artifact = run_report_stage(repo_path, runner, parse_artifact, review_artifact)
+            body = render_report(report_artifact)
+            print("Report complete: markdown ready", file=stdout)
+            print(body, file=stdout)
+            if args.out_path:
+                write_output(Path(args.out_path), body)
+            return 0
+
+        raise AssertionError(f"Unhandled command: {args.command}")
     except StageExecutionError as exc:
         print(f"{exc.stage} stage failed: {exc}", file=stderr)
         return 1

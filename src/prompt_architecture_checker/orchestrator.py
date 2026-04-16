@@ -49,7 +49,7 @@ def run_review_stage(
         raw_response = runner.run(prompt)
         payload = json.loads(raw_response)
         return parse_review_artifact(payload)
-    except (RunnerInvocationError, json.JSONDecodeError, KeyError) as exc:
+    except (RunnerInvocationError, json.JSONDecodeError, KeyError, ValueError) as exc:
         raise StageExecutionError("review", str(exc)) from exc
 
 

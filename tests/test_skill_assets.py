@@ -53,6 +53,33 @@ def test_review_artifact_parser_reads_expected_shape():
     assert artifact.findings[0].category == "flow"
 
 
+def test_review_artifact_parser_rejects_unsupported_severity():
+    try:
+        parse_review_artifact(
+            {
+                "findings": [
+                    {
+                        "severity": "critical",
+                        "findingClass": "high-risk-signal",
+                        "category": "flow",
+                        "artifactScope": "examples/sample-orchestrator.contract.json",
+                        "message": "Release flow is not explicit on failure.",
+                        "evidence": [
+                            "Completion text exists but no failure-path edge is declared."
+                        ],
+                        "whyItMatters": "Cleanup behavior cannot be verified from declared structure.",
+                        "suggestedFix": "Add a failure-path cleanup edge.",
+                    }
+                ]
+            }
+        )
+    except ValueError as exc:
+        assert "Unsupported review finding severity" in str(exc)
+        assert "critical" in str(exc)
+    else:
+        raise AssertionError("Expected parse_review_artifact() to reject unsupported severity")
+
+
 def test_build_review_prompt_embeds_parse_artifact():
     parse_artifact = parse_parse_artifact(
         {

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
+SUPPORTED_REVIEW_SEVERITIES = {"error", "warning", "info"}
+
 
 @dataclass(frozen=True)
 class ParseArtifact:
@@ -42,10 +44,19 @@ def parse_parse_artifact(payload: dict[str, Any]) -> ParseArtifact:
 
 
 def parse_review_artifact(payload: dict[str, Any]) -> ReviewArtifact:
-    return ReviewArtifact(
-        findings=[
+    findings = []
+    for item in payload["findings"]:
+        severity = item["severity"]
+        if severity not in SUPPORTED_REVIEW_SEVERITIES:
+            supported = ", ".join(sorted(SUPPORTED_REVIEW_SEVERITIES))
+            raise ValueError(
+                f"Unsupported review finding severity '{severity}'. "
+                f"Supported severities: {supported}."
+            )
+
+        findings.append(
             ReviewFinding(
-                severity=item["severity"],
+                severity=severity,
                 finding_class=item["findingClass"],
                 category=item["category"],
                 artifact_scope=item["artifactScope"],
@@ -54,6 +65,8 @@ def parse_review_artifact(payload: dict[str, Any]) -> ReviewArtifact:
                 why_it_matters=item["whyItMatters"],
                 suggested_fix=item["suggestedFix"],
             )
-            for item in payload["findings"]
-        ]
+        )
+
+    return ReviewArtifact(
+        findings=findings
     )

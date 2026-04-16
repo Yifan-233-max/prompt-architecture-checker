@@ -102,6 +102,8 @@ Install the package locally:
 python -m pip install -e .[dev]
 ```
 
+This experimental CLI expects an editable install from a repository checkout because it reads local repository skill assets.
+
 Run the three first-slice commands:
 
 ```bash

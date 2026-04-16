@@ -10,4 +10,18 @@ SKILL_PATHS = {
 
 
 def load_skill_text(stage: str) -> str:
-    return SKILL_PATHS[stage].read_text(encoding="utf-8")
+    skill_path = SKILL_PATHS.get(stage)
+    if skill_path is None:
+        supported_stages = ", ".join(sorted(SKILL_PATHS))
+        raise ValueError(
+            f"Unknown skill stage '{stage}'. Expected one of: {supported_stages}."
+        )
+
+    try:
+        return skill_path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Missing skill asset for '{stage}' stage at '{skill_path}'. "
+            "This experimental CLI expects repository skill assets to be available "
+            "from an editable install in a repository checkout."
+        ) from exc

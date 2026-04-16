@@ -52,6 +52,8 @@ def test_parse_command_surfaces_missing_skill_file(sample_repo, monkeypatch, cap
     assert exit_code == 1
     assert "parse stage failed:" in error_output
     assert "missing-skill.md" in error_output
+    assert "editable install" in error_output
+    assert "repository checkout" in error_output
     assert "Traceback" not in error_output
 
 
@@ -109,3 +111,40 @@ def test_report_command_surfaces_report_stage_failure(sample_repo, capsys):
 
     assert exit_code == 1
     assert "report stage failed: runner failed" in error_output
+
+
+def test_review_command_rejects_unsupported_finding_severity(sample_repo, capsys):
+    runner = QueuedRunner(
+        json.dumps(
+            {
+                "summary": ["ui-test-orchestrator"],
+                "graph": ["ui-test-orchestrator -> report-generator"],
+                "evidence": ["examples/sample-orchestrator.contract.json"],
+                "uncertainties": ["failure cleanup inferred"],
+            }
+        ),
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "severity": "critical",
+                        "findingClass": "high-risk-signal",
+                        "category": "flow",
+                        "artifactScope": "examples/sample-orchestrator.contract.json",
+                        "message": "Release flow is not explicit on failure.",
+                        "evidence": ["Completion text exists but no failure-path edge is declared."],
+                        "whyItMatters": "Cleanup behavior cannot be verified from declared structure.",
+                        "suggestedFix": "Add a failure-path cleanup edge.",
+                    }
+                ]
+            }
+        ),
+    )
+
+    exit_code = main(["review", str(sample_repo)], runner=runner)
+    error_output = capsys.readouterr().err
+
+    assert exit_code == 1
+    assert "review stage failed:" in error_output
+    assert "Unsupported review finding severity" in error_output
+    assert "critical" in error_output
