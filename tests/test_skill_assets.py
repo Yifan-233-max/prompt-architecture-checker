@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from prompt_architecture_checker.contracts import (
     parse_parse_artifact,
     parse_review_artifact,
@@ -54,7 +56,7 @@ def test_review_artifact_parser_reads_expected_shape():
 
 
 def test_review_artifact_parser_rejects_unsupported_severity():
-    try:
+    with pytest.raises(ValueError) as excinfo:
         parse_review_artifact(
             {
                 "findings": [
@@ -73,11 +75,9 @@ def test_review_artifact_parser_rejects_unsupported_severity():
                 ]
             }
         )
-    except ValueError as exc:
-        assert "Unsupported review finding severity" in str(exc)
-        assert "critical" in str(exc)
-    else:
-        raise AssertionError("Expected parse_review_artifact() to reject unsupported severity")
+
+    assert "Unsupported review finding severity" in str(excinfo.value)
+    assert "critical" in str(excinfo.value)
 
 
 def test_build_review_prompt_embeds_parse_artifact():

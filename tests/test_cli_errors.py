@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from prompt_architecture_checker.cli import main
 from prompt_architecture_checker.runner import RunnerInvocationError
 from prompt_architecture_checker import skill_assets
@@ -57,6 +59,26 @@ def test_parse_command_surfaces_missing_skill_file(sample_repo, monkeypatch, cap
     assert "Traceback" not in error_output
 
 
+def test_parse_command_surfaces_malformed_parse_payload_types(sample_repo, capsys):
+    runner = QueuedRunner(
+        json.dumps(
+            {
+                "summary": 42,
+                "graph": ["ui-test-orchestrator -> report-generator"],
+                "evidence": ["examples/sample-orchestrator.contract.json"],
+                "uncertainties": ["failure cleanup inferred"],
+            }
+        )
+    )
+
+    exit_code = main(["parse", str(sample_repo)], runner=runner)
+    error_output = capsys.readouterr().err
+
+    assert exit_code == 1
+    assert "parse stage failed:" in error_output
+    assert "Traceback" not in error_output
+
+
 def test_review_command_surfaces_review_stage_failure(sample_repo, capsys):
     runner = QueuedRunner(
         json.dumps(
@@ -75,6 +97,42 @@ def test_review_command_surfaces_review_stage_failure(sample_repo, capsys):
 
     assert exit_code == 1
     assert "review stage failed: runner failed" in error_output
+
+
+def test_review_command_surfaces_malformed_review_payload_types(sample_repo, capsys):
+    runner = QueuedRunner(
+        json.dumps(
+            {
+                "summary": ["ui-test-orchestrator"],
+                "graph": ["ui-test-orchestrator -> report-generator"],
+                "evidence": ["examples/sample-orchestrator.contract.json"],
+                "uncertainties": ["failure cleanup inferred"],
+            }
+        ),
+        json.dumps(
+            {
+                "findings": {
+                    "severity": "warning",
+                    "findingClass": "high-risk-signal",
+                    "category": "flow",
+                    "artifactScope": "examples/sample-orchestrator.contract.json",
+                    "message": "Release flow is not explicit on failure.",
+                    "evidence": [
+                        "Completion text exists but no failure-path edge is declared."
+                    ],
+                    "whyItMatters": "Cleanup behavior cannot be verified from declared structure.",
+                    "suggestedFix": "Add a failure-path cleanup edge.",
+                }
+            }
+        ),
+    )
+
+    exit_code = main(["review", str(sample_repo)], runner=runner)
+    error_output = capsys.readouterr().err
+
+    assert exit_code == 1
+    assert "review stage failed:" in error_output
+    assert "Traceback" not in error_output
 
 
 def test_report_command_surfaces_report_stage_failure(sample_repo, capsys):
