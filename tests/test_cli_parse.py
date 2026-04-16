@@ -29,11 +29,3 @@ def test_parse_command_prints_stage_progress_and_parse_result(
     assert "failure cleanup inferred" in output
     assert len(runner.prompts) == 1
     assert "Stage: parse" in runner.prompts[0]
-
-
-def test_unimplemented_commands_report_error(sample_repo, capsys):
-    exit_code = main(["review", str(sample_repo)])
-    output = capsys.readouterr().out
-
-    assert exit_code == 1
-    assert "Command 'review' is not yet implemented." in output
