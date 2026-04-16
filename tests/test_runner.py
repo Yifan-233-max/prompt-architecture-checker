@@ -28,6 +28,20 @@ def test_copilot_runner_returns_stdout_from_subprocess(tmp_path):
     assert runner.run("Stage: parse") == "STAGE: PARSE"
 
 
+def test_copilot_runner_decodes_utf8_subprocess_output(tmp_path):
+    script = tmp_path / "utf8_copilot.py"
+    script.write_text(
+        "import sys\n"
+        "sys.stdin.read()\n"
+        "sys.stdout.buffer.write('✓ parse complete'.encode('utf-8'))\n",
+        encoding="utf-8",
+    )
+
+    runner = CopilotCliRunner(command=[sys.executable, str(script)])
+
+    assert runner.run('Stage: parse') == "✓ parse complete"
+
+
 def test_copilot_runner_raises_on_nonzero_exit(tmp_path):
     script = tmp_path / "failing_copilot.py"
     script.write_text(

@@ -26,6 +26,7 @@ class CopilotCliRunner:
             self.command,
             input=prompt,
             text=True,
+            encoding="utf-8",
             capture_output=True,
             check=False,
         )
