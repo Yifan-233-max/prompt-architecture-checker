@@ -94,7 +94,7 @@ Every finding should include:
 
 ## Experimental CLI
 
-The repository now includes an experimental Python CLI that shells out to the local `copilot` executable as a stage runner.
+The repository includes an experimental Python 3.12+ CLI that shells out to the local `copilot` runner command as a stage runner.
 
 Install the package locally:
 
@@ -105,14 +105,14 @@ python -m pip install -e .[dev]
 Run the three first-slice commands:
 
 ```bash
-prompt-architecture-checker parse .
-prompt-architecture-checker review .
+prompt-architecture-checker parse . --out parse.md
+prompt-architecture-checker review . --out review.md
 prompt-architecture-checker report . --out report.md
 ```
 
-The first implementation uses an experimental Copilot subprocess bridge.
+The first implementation uses an experimental Copilot subprocess bridge. `review` and `report` rerun earlier stages internally, and `prompt-architecture-checker.toml` is read from the working directory.
 
-It expects `copilot` to be available on `PATH`, or for `PAC_COPILOT_BIN` to point at the executable to launch.
+It expects `copilot` to be available on `PATH`, or for `PAC_COPILOT_BIN` to provide the runner command string to launch (for example, a path alone or `path --flags`).
 
 To override the runner command without using an environment variable, create `prompt-architecture-checker.toml` with:
 

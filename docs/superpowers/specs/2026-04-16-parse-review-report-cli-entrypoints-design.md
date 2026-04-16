@@ -249,8 +249,8 @@ The first CLI version should integrate with the user's existing GitHub Copilot C
 ### Configuration precedence
 
 1. CLI flags
-2. config file
-3. environment variables
+2. environment variables
+3. config file
 4. defaults
 
 ### First-slice command flags
