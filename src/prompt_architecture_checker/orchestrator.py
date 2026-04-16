@@ -22,6 +22,10 @@ class StageExecutionError(RuntimeError):
 def run_parse(repo_path: Path, runner: SkillRunner) -> ParseArtifact:
     try:
         skill_text = load_skill_text("parse")
+    except FileNotFoundError as exc:
+        raise StageExecutionError("parse", str(exc)) from exc
+
+    try:
         prompt = build_parse_prompt(repo_path, skill_text)
         raw_response = runner.run(prompt)
         payload = json.loads(raw_response)
@@ -35,6 +39,10 @@ def run_review(repo_path: Path, runner: SkillRunner) -> tuple[ParseArtifact, Rev
 
     try:
         skill_text = load_skill_text("review")
+    except FileNotFoundError as exc:
+        raise StageExecutionError("review", str(exc)) from exc
+
+    try:
         prompt = build_review_prompt(repo_path, skill_text, parse_artifact)
         raw_response = runner.run(prompt)
         payload = json.loads(raw_response)
@@ -52,6 +60,10 @@ def run_report(
 
     try:
         skill_text = load_skill_text("report")
+    except FileNotFoundError as exc:
+        raise StageExecutionError("report", str(exc)) from exc
+
+    try:
         prompt = build_report_prompt(
             repo_path,
             skill_text,
