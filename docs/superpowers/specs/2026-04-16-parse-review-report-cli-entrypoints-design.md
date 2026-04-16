@@ -8,7 +8,7 @@ Add three real user-facing CLI entrypoints for the first product slice:
 - `prompt-architecture-checker review <repo>`
 - `prompt-architecture-checker report <repo>`
 
-These commands should call AI to analyze a prompt-as-code repository, but the external command experience should stay simpler than the internal architecture. Users should be able to point the CLI at a repository directly, while the implementation still preserves a staged `parse -> review -> report` pipeline behind the scenes.
+These commands should invoke the user's existing AI agent environment through a GitHub Copilot CLI skill runner, but the external command experience should stay simpler than the internal architecture. Users should be able to point the CLI at a repository directly, while the implementation still preserves a staged `parse -> review -> report` pipeline behind the scenes.
 
 ## Why This Design
 
@@ -20,15 +20,16 @@ The goal of this design is to make the tool feel like a real CLI without collaps
 2. the terminal shows explicit stage progress
 3. each command returns one primary result
 4. internal stage boundaries remain clean enough for testing and future extension
+5. the tool reuses the user's existing agent environment instead of asking the checker to manage model credentials
 
 ## Product Goal
 
-A maintainer should be able to run one of three commands against a repository and get AI-generated structure understanding, architecture review, or a final report without having to manually manage intermediate artifacts.
+A maintainer should be able to run one of three commands against a repository and get AI-generated structure understanding, architecture review, or a final report without having to manually manage intermediate artifacts or separately configure model providers for the checker itself.
 
 ## Explicit Non-Goals
 
 - forcing users to pass intermediate artifact files between commands
-- exposing provider-specific credential handling in the command contract
+- configuring model providers directly inside the checker CLI
 - making JSON or machine-first output the primary first-version experience
 - adding deterministic lint or workflow simulation to the first CLI surface
 - turning `review` or `report` into broad all-in-one analyzers with no stage boundaries
@@ -107,9 +108,11 @@ Internally, every invocation still follows stage boundaries:
 
 Command-specific behavior:
 
-- `parse` executes only the parse stage
-- `review` executes parse if needed, then review
-- `report` executes parse and review if needed, then report
+- `parse` invokes `parse-skill` only
+- `review` invokes `parse-skill` first if needed, then invokes `review-skill`
+- `report` invokes `parse-skill`, then `review-skill`, then `report-skill`
+
+The CLI is responsible for that orchestration. The individual skills should stay focused on their own stage rather than recursively calling one another.
 
 This preserves a clean internal pipeline while keeping the outer command model simple.
 
@@ -151,7 +154,7 @@ Responsibilities:
 
 - parse command name and arguments
 - validate repo path
-- parse flags such as `--provider`, `--model`, and `--out`
+- parse flags such as `--out`
 
 ### 2. Run coordinator
 
@@ -162,48 +165,49 @@ Responsibilities:
 - print stage progress and short stage summaries
 - hold the current invocation context in memory
 
-### 3. Repository reader
+### 3. GitHub Copilot CLI runner adapter
 
 Responsibilities:
 
-- inspect the repository tree
-- choose the files worth sending into AI analysis
-- avoid blindly reading or prompting on the entire repository
+- invoke the current GitHub Copilot CLI skill runner
+- pass stage-specific context such as repo path and stage goal
+- normalize runner responses into checker-owned stage results
 
-### 4. Parse engine
+### 4. Parse skill invoker
 
 Responsibilities:
 
-- call AI to produce:
+- invoke `parse-skill`
+- collect:
   - structure summary
   - key relationship graph
   - evidence
   - uncertainties
 
-### 5. Review engine
+### 5. Review skill invoker
 
 Responsibilities:
 
-- consume parse output rather than re-explaining the repository from scratch
-- produce findings only in the approved first-slice categories:
+- invoke `review-skill` with parse output
+- require it to stay within the approved first-slice categories:
   - handoff and completion problems
   - graph problems
   - implicit state problems
 
-### 6. Report renderer
+### 6. Report skill invoker
 
 Responsibilities:
 
-- combine parse and review outputs
-- render the final markdown report
+- invoke `report-skill` with parse and review outputs
+- render the final markdown report returned by that stage
 - avoid inventing new conclusions beyond what parse and review already established
 
-### 7. AI adapter
+### 7. Stage result normalizer
 
 Responsibilities:
 
-- provide a provider-agnostic interface for model invocation
-- keep command behavior independent of the chosen AI backend
+- turn runner responses into checker-owned parse, review, and report artifacts
+- keep the CLI's stage contracts stable even if runner output evolves
 
 ## Data Boundaries
 
@@ -240,7 +244,7 @@ Should produce:
 
 ## Configuration Model
 
-The AI integration should be provider-agnostic.
+The first CLI version should integrate with the user's existing GitHub Copilot CLI environment rather than asking the checker to manage model selection directly.
 
 ### Configuration precedence
 
@@ -253,11 +257,9 @@ The AI integration should be provider-agnostic.
 
 At minimum:
 
-- `--provider`
-- `--model`
 - `--out`
 
-Provider-specific credentials should remain outside the public command contract and should be resolved by the configured adapter through environment or config.
+Runner discovery and any Copilot-specific environment requirements should remain outside the user-facing command contract.
 
 ## Failure Boundaries
 
@@ -271,13 +273,13 @@ Fail before any AI call when:
 - the repository path is unreadable
 - the repository path is not a supported local repository target
 
-### Setup failures
+### Runner setup failures
 
 Fail with a setup error when:
 
-- the provider is not configured
-- the chosen model is not configured or not available
-- required provider credentials are missing
+- the GitHub Copilot CLI runner is not available
+- the required skill cannot be found
+- the runner invocation contract is incomplete or invalid
 
 ### Stage failures
 
@@ -289,6 +291,7 @@ Fail with a setup error when:
 
 - `review` must not silently reconstruct the repository instead of using parse output
 - `report` must not invent findings or conclusions that parse and review did not establish
+- skills should not self-orchestrate prerequisite stages that the CLI is already responsible for sequencing
 
 ## Testing Strategy
 
@@ -323,9 +326,9 @@ Use golden outputs to verify that `report` produces a stable markdown structure 
 
 Verify:
 
-- `parse <repo>` runs only parse
-- `review <repo>` runs parse then review
-- `report <repo>` runs parse then review then report
+- `parse <repo>` invokes only `parse-skill`
+- `review <repo>` invokes `parse-skill` then `review-skill`
+- `report <repo>` invokes `parse-skill` then `review-skill` then `report-skill`
 - stage progress is visible in the terminal
 - `--out` writes the primary output for the invoked command
 
@@ -336,8 +339,8 @@ This design intentionally keeps the user-facing CLI simple while protecting the 
 That tradeoff matters:
 
 - a repository-direct command surface makes the tool feel easy to use
-- staged internal artifacts keep the implementation testable
-- provider-agnostic AI integration avoids coupling the public CLI to one backend
+- CLI orchestration keeps the implementation testable
+- reusing the user's existing Copilot environment avoids turning the checker into a model-configuration product
 - terminal-first behavior makes the first version immediately usable without introducing a full artifact management workflow
 
-The result is a CLI that feels like a product entrypoint rather than a developer-only pipeline, while still preserving the `parse -> review -> report` architecture as the core design truth.
+The result is a CLI that feels like a product entrypoint rather than a developer-only pipeline, while still preserving the `parse -> review -> report` architecture as the core design truth and using three explicit skills as the execution units behind that flow.
