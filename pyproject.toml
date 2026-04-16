@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prompt-architecture-checker"
+version = "0.1.0"
+description = "CLI entrypoints for parse, review, and report over prompt-as-code repositories."
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+prompt-architecture-checker = "prompt_architecture_checker.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
