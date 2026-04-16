@@ -34,9 +34,11 @@ def run_parse(repo_path: Path, runner: SkillRunner) -> ParseArtifact:
         raise StageExecutionError("parse", str(exc)) from exc
 
 
-def run_review(repo_path: Path, runner: SkillRunner) -> tuple[ParseArtifact, ReviewArtifact]:
-    parse_artifact = run_parse(repo_path, runner)
-
+def run_review_stage(
+    repo_path: Path,
+    runner: SkillRunner,
+    parse_artifact: ParseArtifact,
+) -> ReviewArtifact:
     try:
         skill_text = load_skill_text("review")
     except FileNotFoundError as exc:
@@ -46,18 +48,23 @@ def run_review(repo_path: Path, runner: SkillRunner) -> tuple[ParseArtifact, Rev
         prompt = build_review_prompt(repo_path, skill_text, parse_artifact)
         raw_response = runner.run(prompt)
         payload = json.loads(raw_response)
-        review_artifact = parse_review_artifact(payload)
-        return parse_artifact, review_artifact
+        return parse_review_artifact(payload)
     except (RunnerInvocationError, json.JSONDecodeError, KeyError) as exc:
         raise StageExecutionError("review", str(exc)) from exc
 
 
-def run_report(
+def run_review(repo_path: Path, runner: SkillRunner) -> tuple[ParseArtifact, ReviewArtifact]:
+    parse_artifact = run_parse(repo_path, runner)
+    review_artifact = run_review_stage(repo_path, runner, parse_artifact)
+    return parse_artifact, review_artifact
+
+
+def run_report_stage(
     repo_path: Path,
     runner: SkillRunner,
-) -> tuple[ParseArtifact, ReviewArtifact, ReportArtifact]:
-    parse_artifact, review_artifact = run_review(repo_path, runner)
-
+    parse_artifact: ParseArtifact,
+    review_artifact: ReviewArtifact,
+) -> ReportArtifact:
     try:
         skill_text = load_skill_text("report")
     except FileNotFoundError as exc:
@@ -71,6 +78,15 @@ def run_report(
             review_artifact,
         )
         raw_response = runner.run(prompt)
-        return parse_artifact, review_artifact, ReportArtifact(markdown=raw_response)
+        return ReportArtifact(markdown=raw_response)
     except RunnerInvocationError as exc:
         raise StageExecutionError("report", str(exc)) from exc
+
+
+def run_report(
+    repo_path: Path,
+    runner: SkillRunner,
+) -> tuple[ParseArtifact, ReviewArtifact, ReportArtifact]:
+    parse_artifact, review_artifact = run_review(repo_path, runner)
+    report_artifact = run_report_stage(repo_path, runner, parse_artifact, review_artifact)
+    return parse_artifact, review_artifact, report_artifact

@@ -3,7 +3,14 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from .orchestrator import StageExecutionError, run_parse, run_report, run_review
+from .orchestrator import (
+    StageExecutionError,
+    run_parse,
+    run_report,
+    run_report_stage,
+    run_review,
+    run_review_stage,
+)
 from .output import render_parse, render_report, render_review, write_output
 from .runner import CopilotCliRunner, SkillRunner
 
@@ -63,12 +70,13 @@ def main(
 
         if args.command == "review":
             print("Parsing...", file=stdout)
-            parse_artifact, review_artifact = run_review(repo_path, runner)
+            parse_artifact = run_parse(repo_path, runner)
             print(
                 f"Parse complete: {len(parse_artifact.summary)} summary items, {len(parse_artifact.graph)} graph edges",
                 file=stdout,
             )
             print("Reviewing...", file=stdout)
+            review_artifact = run_review_stage(repo_path, runner, parse_artifact)
             body = render_review(review_artifact)
             print(
                 f"Review complete: {len(review_artifact.findings)} findings",
@@ -80,17 +88,19 @@ def main(
             return 0
 
         print("Parsing...", file=stdout)
-        parse_artifact, review_artifact, report_artifact = run_report(repo_path, runner)
+        parse_artifact = run_parse(repo_path, runner)
         print(
             f"Parse complete: {len(parse_artifact.summary)} summary items, {len(parse_artifact.graph)} graph edges",
             file=stdout,
         )
         print("Reviewing...", file=stdout)
+        review_artifact = run_review_stage(repo_path, runner, parse_artifact)
         print(
             f"Review complete: {len(review_artifact.findings)} findings",
             file=stdout,
         )
         print("Reporting...", file=stdout)
+        report_artifact = run_report_stage(repo_path, runner, parse_artifact, review_artifact)
         body = render_report(report_artifact)
         print("Report complete: markdown ready", file=stdout)
         print(body, file=stdout)
