@@ -91,3 +91,32 @@ Every finding should include:
 2. Add deterministic lint once the parse artifact stabilizes.
 3. Add CI integration as a GitHub Action.
 4. Consider workflow simulation after graph and review maturity.
+
+## Experimental CLI
+
+The repository now includes an experimental Python CLI that shells out to the local `copilot` executable as a stage runner.
+
+Install the package locally:
+
+```bash
+python -m pip install -e .[dev]
+```
+
+Run the three first-slice commands:
+
+```bash
+prompt-architecture-checker parse .
+prompt-architecture-checker review .
+prompt-architecture-checker report . --out report.md
+```
+
+The first implementation uses an experimental Copilot subprocess bridge.
+
+It expects `copilot` to be available on `PATH`, or for `PAC_COPILOT_BIN` to point at the executable to launch.
+
+To override the runner command without using an environment variable, create `prompt-architecture-checker.toml` with:
+
+```toml
+[runner]
+command = "copilot --experimental"
+```
