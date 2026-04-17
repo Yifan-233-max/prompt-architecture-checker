@@ -36,43 +36,46 @@ The first version focuses on AI-assisted structure understanding and focused arc
 
 ## Included Reviewer Skill Assets
 
-- `SKILL.md`: public skill entrypoint
-- `reviewer-prompt.md`: detailed review procedure
-- `output-format.md`: canonical findings model and report shape
+- `SKILL.md`: public skill entrypoint and pipeline contract
+- `src/prompt_architecture_checker/assets/skills/parse-skill/SKILL.md`
+- `src/prompt_architecture_checker/assets/skills/review-skill/SKILL.md`
+- `src/prompt_architecture_checker/assets/skills/report-skill/SKILL.md`
 - `examples/good-repo/`, `examples/bad-repo/`, `examples/mixed-repo/`: repository review fixtures and expected outputs
 
-## Proposed Components
+## Pipeline Contract
 
-- `parse`: interprets a prompt-as-code repository and produces a structure summary plus relationship graph
-- `review`: analyzes parse output for high-value architecture issues
-- `report`: produces the final structure-and-findings report
+- `parse` is the ONLY stage that reads repository files. It produces
+  `summary`, `graph`, `evidence`, `uncertainties`.
+- `review` consumes the parse artifact and MUST NOT re-read the repository.
+  Every finding cites parse evidence or is marked `reviewability-gap`.
+- `report` consumes parse + review and renders a prioritized markdown report.
+  It MUST NOT re-read the repository.
 
 ## Repository Layout
 
+- `SKILL.md`: skill entrypoint and pipeline contract
+- `src/prompt_architecture_checker/`: Python CLI implementation
+- `src/prompt_architecture_checker/assets/skills/`: per-stage SKILL.md assets bundled with the wheel
+- `schemas/prompt-contract.schema.json`: minimal machine-readable contract schema
 - `docs/vision.md`: product vision and architecture
 - `docs/lint-rules.md`: candidate future deterministic lint rules
-- `schemas/prompt-contract.schema.json`: minimal machine-readable contract schema
-- `SKILL.md`: public entrypoint for repository-level prompt architecture review
-- `reviewer-prompt.md`: detailed review procedure for parse-informed architecture review
-- `output-format.md`: canonical findings schema and report templates
-- `examples/`: example prompt-as-code structures, contract snippets, sample parse / review / report outputs, and reviewer fixtures
+- `examples/`: fixture repositories and sample parse / review / report outputs
 
 ## Suggested Reading Order
 
 1. `README.md` for repository purpose and quick usage
-2. `docs/vision.md` for product direction and architecture framing
-3. `SKILL.md` for the public skill contract
-4. `reviewer-prompt.md` for the detailed review heuristic
-5. `output-format.md` for the report shape
-6. `examples/` for fixture repositories and expected outputs
+2. `SKILL.md` for the pipeline contract
+3. The three per-stage `SKILL.md` files under `src/prompt_architecture_checker/assets/skills/`
+4. `docs/vision.md` for product direction and architecture framing
+5. `examples/` for fixture repositories and expected outputs
 
 ## Review Output Contract
 
-Every finding should include:
+Every finding includes:
 
-- severity
-- findingClass
-- category
+- severity: `error` | `warning` | `info`
+- findingClass: `confirmed` | `high-risk-signal` | `reviewability-gap`
+- category: `contract` | `flow` | `pattern`
 - artifactScope
 - message
 - evidence

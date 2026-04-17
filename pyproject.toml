@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prompt-architecture-checker"
-version = "0.1.0"
+version = "0.1.1"
 description = "Architecture and workflow quality checker for prompt-as-code repositories (parse, review, report)."
 readme = "README.md"
 license = { file = "LICENSE" }

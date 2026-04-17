@@ -5,47 +5,45 @@ description: Review a prompt-as-code repository for contract, flow, and architec
 
 # Prompt Architecture Reviewer
 
-Use this skill when a user wants a repository-level review of a prompt-as-code project, agent workflow repository, or multi-file prompt orchestration system.
+A three-stage pipeline for architecture review of prompt-as-code repositories:
 
-## Outcome
+1. **parse** — inventory repository structure and handoff graph (the only
+   stage that reads repository files).
+2. **review** — judge contract, flow, and pattern weaknesses strictly from
+   the parse artifact.
+3. **report** — render a prioritized human-readable markdown report from the
+   parse and review artifacts.
 
-Return a severity-ranked findings list with evidence and concrete modification suggestions.
+## Stage Skills
 
-## Hard Gates
+The runtime skills shipped inside the installed Python package are the
+source of truth for each stage:
 
-- Review the repository structure before making conclusions.
-- Build a structural inventory of orchestrators, agents, skills, workflows, state, artifacts, and handoffs.
-- Separate confirmed findings, high-risk signals, and reviewability gaps.
-- Do not claim runtime behavior unless the repository evidence supports it.
-- Focus on contract, flow, and architecture-pattern issues before style.
+- `src/prompt_architecture_checker/assets/skills/parse-skill/SKILL.md`
+- `src/prompt_architecture_checker/assets/skills/review-skill/SKILL.md`
+- `src/prompt_architecture_checker/assets/skills/report-skill/SKILL.md`
 
-## Workflow
+Each stage SKILL.md defines purpose, procedure, output contract, and hard
+rules. No other document overrides them.
 
-1. Inspect the repository tree and main documentation.
-2. Identify the core artifacts and likely subsystem boundaries.
-3. Follow `reviewer-prompt.md` for the detailed review procedure.
-4. Format the final report using `output-format.md`.
+## Pipeline Contract
 
-## Required Report Shape
+- Only `parse` reads repository files.
+- `review` consumes the parse artifact and MUST NOT re-read the repository.
+- `report` consumes the parse and review artifacts and MUST NOT re-read
+  the repository.
+- Every finding must cite evidence that already exists in the parse artifact
+  or declare a `reviewability-gap` when evidence is missing.
 
-Every finding must include:
+## When to Invoke This Skill
 
-- severity
-- findingClass
-- category
-- artifactScope
-- message
-- evidence
-- whyItMatters
-- suggestedFix
+- Repository-level review of a prompt-as-code project.
+- Agent workflow repository with orchestrators, agents, or skills.
+- Multi-file prompt orchestration system with persistent state or artifacts.
 
-Sort findings by severity first, then by architectural impact.
+## Non-Goals
 
-## Review Focus
-
-- contract gaps
-- weak or ambiguous handoffs
-- hidden shared-state coupling
-- unclear completion signals
-- architecture-pattern weaknesses
-- reviewability gaps caused by implicit structure
+- Replacing natural-language prompts with a rigid DSL.
+- Enforcing writing style or tone.
+- Executing external tools for deterministic lint (tracked in
+  `docs/lint-rules.md`).
