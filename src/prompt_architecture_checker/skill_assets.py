@@ -1,27 +1,38 @@
-from pathlib import Path
+from importlib.resources import files
+from importlib.resources.abc import Traversable
 
 
-ROOT = Path(__file__).resolve().parents[2]
-SKILL_PATHS = {
-    "parse": ROOT / "skills" / "parse-skill" / "SKILL.md",
-    "review": ROOT / "skills" / "review-skill" / "SKILL.md",
-    "report": ROOT / "skills" / "report-skill" / "SKILL.md",
+SKILL_ASSET_DIRS = {
+    "parse": "parse-skill",
+    "review": "review-skill",
+    "report": "report-skill",
 }
 
 
-def load_skill_text(stage: str) -> str:
-    skill_path = SKILL_PATHS.get(stage)
-    if skill_path is None:
-        supported_stages = ", ".join(sorted(SKILL_PATHS))
+def _skill_resource(stage: str) -> Traversable:
+    asset_dir = SKILL_ASSET_DIRS.get(stage)
+    if asset_dir is None:
+        supported_stages = ", ".join(sorted(SKILL_ASSET_DIRS))
         raise ValueError(
             f"Unknown skill stage '{stage}'. Expected one of: {supported_stages}."
         )
 
+    return (
+        files("prompt_architecture_checker")
+        .joinpath("assets")
+        .joinpath("skills")
+        .joinpath(asset_dir)
+        .joinpath("SKILL.md")
+    )
+
+
+def load_skill_text(stage: str) -> str:
+    resource = _skill_resource(stage)
     try:
-        return skill_path.read_text(encoding="utf-8")
-    except FileNotFoundError as exc:
+        return resource.read_text(encoding="utf-8")
+    except (FileNotFoundError, OSError) as exc:
         raise FileNotFoundError(
-            f"Missing skill asset for '{stage}' stage at '{skill_path}'. "
-            "This experimental CLI expects repository skill assets to be available "
-            "from an editable install in a repository checkout."
+            f"Missing bundled skill asset for '{stage}' stage. "
+            "The installed prompt-architecture-checker package appears to be "
+            "missing its assets/skills/ resources."
         ) from exc

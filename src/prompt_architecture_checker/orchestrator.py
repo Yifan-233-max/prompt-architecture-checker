@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from .contracts import (
@@ -11,6 +12,34 @@ from .contracts import (
 from .prompt_builder import build_parse_prompt, build_report_prompt, build_review_prompt
 from .runner import RunnerInvocationError, SkillRunner
 from .skill_assets import load_skill_text
+
+
+_FENCED_JSON = re.compile(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", re.DOTALL | re.IGNORECASE)
+
+
+def _extract_json_payload(raw: str) -> str:
+    text = raw.strip()
+    if not text:
+        raise json.JSONDecodeError("Empty response from runner.", text, 0)
+
+    match = _FENCED_JSON.search(text)
+    if match:
+        return match.group(1).strip()
+
+    if text[0] in "{[":
+        return text
+
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return text[start : end + 1]
+
+    raise json.JSONDecodeError(
+        "Runner response did not contain a JSON object. "
+        f"Response preview: {text[:200]!r}",
+        text,
+        0,
+    )
 
 
 class StageExecutionError(RuntimeError):
@@ -28,7 +57,7 @@ def run_parse(repo_path: Path, runner: SkillRunner) -> ParseArtifact:
     try:
         prompt = build_parse_prompt(repo_path, skill_text)
         raw_response = runner.run(prompt)
-        payload = json.loads(raw_response)
+        payload = json.loads(_extract_json_payload(raw_response))
         return parse_parse_artifact(payload)
     except (RunnerInvocationError, json.JSONDecodeError, KeyError, TypeError) as exc:
         raise StageExecutionError("parse", str(exc)) from exc
@@ -47,7 +76,7 @@ def run_review_stage(
     try:
         prompt = build_review_prompt(repo_path, skill_text, parse_artifact)
         raw_response = runner.run(prompt)
-        payload = json.loads(raw_response)
+        payload = json.loads(_extract_json_payload(raw_response))
         return parse_review_artifact(payload)
     except (RunnerInvocationError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
         raise StageExecutionError("review", str(exc)) from exc

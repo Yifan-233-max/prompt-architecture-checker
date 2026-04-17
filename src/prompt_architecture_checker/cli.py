@@ -111,3 +111,7 @@ def main(
     except StageExecutionError as exc:
         print(f"{exc.stage} stage failed: {exc}", file=stderr)
         return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

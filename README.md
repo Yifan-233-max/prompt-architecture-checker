@@ -94,31 +94,69 @@ Every finding should include:
 
 ## Experimental CLI
 
-The repository includes an experimental Python 3.12+ CLI that shells out to the local `copilot` runner command as a stage runner.
+The repository ships an experimental Python 3.12+ CLI that shells out to the local GitHub Copilot CLI (`copilot`) as its stage runner.
 
-Install the package locally:
+### Install
+
+Three options, pick one:
+
+1. **From a GitHub Release (no repo checkout required)**
+
+   Grab the wheel URL from the latest release and install directly:
+
+   ```bash
+   pip install https://github.com/Yifan-233-max/prompt-architecture-checker/releases/latest/download/prompt_architecture_checker-0.1.0-py3-none-any.whl
+   ```
+
+2. **From PyPI** (once the project publishes there)
+
+   ```bash
+   pip install prompt-architecture-checker
+   ```
+
+3. **Editable from a local clone** (for contributors)
+
+   ```bash
+   git clone https://github.com/Yifan-233-max/prompt-architecture-checker.git
+   cd prompt-architecture-checker
+   python -m pip install -e .[dev]
+   ```
+
+The skill assets (`parse` / `review` / `report` prompts) are bundled inside the wheel, so installations from the release wheel or PyPI do **not** require a repo checkout.
+
+### Prerequisites
+
+The default runner invokes the GitHub Copilot CLI in non-interactive mode
+(`copilot -p ... --allow-all-tools --no-color -s`). Install it from
+<https://github.com/github/copilot-cli> and make sure `copilot` is on `PATH`.
+
+### Run
 
 ```bash
-python -m pip install -e .[dev]
+prompt-architecture-checker parse  path/to/target-repo --out parse.md
+prompt-architecture-checker review path/to/target-repo --out review.md
+prompt-architecture-checker report path/to/target-repo --out report.md
 ```
 
-This experimental CLI expects an editable install from a repository checkout because it reads local repository skill assets.
-
-Run the three first-slice commands:
+Or, equivalently, as a module:
 
 ```bash
-prompt-architecture-checker parse . --out parse.md
-prompt-architecture-checker review . --out review.md
-prompt-architecture-checker report . --out report.md
+python -m prompt_architecture_checker report path/to/target-repo --out report.md
 ```
 
-The first implementation uses an experimental Copilot subprocess bridge. `review` and `report` rerun earlier stages internally, and `prompt-architecture-checker.toml` is read from the working directory.
+`review` and `report` rerun earlier stages internally. `--out` is optional; when omitted the markdown is printed to stdout only.
 
-It expects `copilot` to be available on `PATH`, or for `PAC_COPILOT_BIN` to provide the runner command string to launch (for example, a path alone or `path --flags`).
+### Runner configuration
 
-To override the runner command without using an environment variable, create `prompt-architecture-checker.toml` with:
+Override the runner command either via an environment variable:
+
+```bash
+set PAC_COPILOT_BIN=copilot
+```
+
+or in a `prompt-architecture-checker.toml` file in the working directory:
 
 ```toml
 [runner]
-command = "copilot --experimental"
+command = "copilot"
 ```

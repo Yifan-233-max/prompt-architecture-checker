@@ -18,7 +18,8 @@ def test_copilot_runner_returns_stdout_from_subprocess(tmp_path):
     script = tmp_path / "fake_copilot.py"
     script.write_text(
         "import sys\n"
-        "prompt = sys.stdin.read()\n"
+        "# args: [..., '-p', prompt]\n"
+        "prompt = sys.argv[-1]\n"
         "sys.stdout.write(prompt.upper())\n",
         encoding="utf-8",
     )
@@ -32,7 +33,6 @@ def test_copilot_runner_decodes_utf8_subprocess_output(tmp_path):
     script = tmp_path / "utf8_copilot.py"
     script.write_text(
         "import sys\n"
-        "sys.stdin.read()\n"
         "sys.stdout.buffer.write('✓ parse complete'.encode('utf-8'))\n",
         encoding="utf-8",
     )

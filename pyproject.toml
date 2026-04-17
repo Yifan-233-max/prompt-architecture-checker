@@ -5,15 +5,45 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "prompt-architecture-checker"
 version = "0.1.0"
-description = "CLI entrypoints for parse, review, and report over prompt-as-code repositories."
+description = "Architecture and workflow quality checker for prompt-as-code repositories (parse, review, report)."
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.12"
+authors = [{ name = "prompt-architecture-checker contributors" }]
+keywords = [
+    "prompt-engineering",
+    "agents",
+    "linter",
+    "architecture",
+    "static-analysis",
+    "llm",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "build>=1.2", "twine>=5.0"]
+
+[project.urls]
+Homepage = "https://github.com/Yifan-233-max/prompt-architecture-checker"
+Issues = "https://github.com/Yifan-233-max/prompt-architecture-checker/issues"
+Source = "https://github.com/Yifan-233-max/prompt-architecture-checker"
 
 [project.scripts]
 prompt-architecture-checker = "prompt_architecture_checker.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+prompt_architecture_checker = ["assets/**/*.md", "assets/**/*.json"]

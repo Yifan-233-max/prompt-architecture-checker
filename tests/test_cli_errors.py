@@ -2,7 +2,7 @@ import json
 
 from prompt_architecture_checker.cli import main
 from prompt_architecture_checker.runner import RunnerInvocationError
-from prompt_architecture_checker import skill_assets
+from prompt_architecture_checker import orchestrator, skill_assets
 
 
 class ExplodingRunner:
@@ -40,20 +40,23 @@ def test_review_command_surfaces_stage_failure(sample_repo, capsys):
 
 
 def test_parse_command_surfaces_missing_skill_file(sample_repo, monkeypatch, capsys):
-    monkeypatch.setitem(
-        skill_assets.SKILL_PATHS,
-        "parse",
-        sample_repo / "missing-skill.md",
-    )
+    def _raise_missing(stage: str) -> str:
+        raise FileNotFoundError(
+            f"Missing bundled skill asset for '{stage}' stage. "
+            "The installed prompt-architecture-checker package appears to be "
+            "missing its assets/skills/ resources."
+        )
+
+    monkeypatch.setattr(skill_assets, "load_skill_text", _raise_missing)
+    monkeypatch.setattr(orchestrator, "load_skill_text", _raise_missing)
 
     exit_code = main(["parse", str(sample_repo)], runner=QueuedRunner("unused"))
     error_output = capsys.readouterr().err
 
     assert exit_code == 1
     assert "parse stage failed:" in error_output
-    assert "missing-skill.md" in error_output
-    assert "editable install" in error_output
-    assert "repository checkout" in error_output
+    assert "Missing bundled skill asset" in error_output
+    assert "assets/skills/" in error_output
     assert "Traceback" not in error_output
 
 
